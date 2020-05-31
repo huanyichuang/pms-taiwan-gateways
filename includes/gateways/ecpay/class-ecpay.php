@@ -134,8 +134,8 @@ function pms_ecpay_extend() {
             */
             public function process_webhooks() {
 
-                if( !isset( $_GET['pay_gate_listener'] ) || $_GET['pay_gate_listener'] != 'ecpay' )
-                    return;
+                // if( !isset( $_GET['pay_gate_listener'] ) || $_GET['pay_gate_listener'] != 'ecpay' )
+                //     return;
 
                 // Init ECPay Verifier
                 $ecpay_verifier = new PMS_ECPay_Verifier();
@@ -158,9 +158,9 @@ function pms_ecpay_extend() {
                 if( $verified ) {
 
                     $post_data = $_POST;
-
+                    
                     // Get payment id from custom variable sent by ECPay
-                    $payment_id = isset( $post_data['CustomField1'] ) ? $post_data['CustomField1'] : 29;
+                    $payment_id = isset( $post_data['CustomField1'] ) ? $post_data['CustomField1'] : 0;
 
                     // Get the payment
                     $payment = pms_get_payment( $payment_id );
@@ -173,23 +173,21 @@ function pms_ecpay_extend() {
                         'payment_id'     => $payment_id,
                         'user_id'        => $user_id,
                         'type'           => $post_data['PaymentType'],
-                        'status'         => $post_data['RtnCode'] == 1 ? 'completed' : 'pending',
+                        'status'         => $post_data['RtnCode'] == 1 ? 'completed' : 'failed',
                         'transaction_id' => $post_data['MerchantTradeNo'],
                         'amount'         => $post_data['TradeAmt'],
                         'date'           => $post_data['PaymentDate'],
                         'subscription_id'=> $post_data['CustomField2']
                     ), $post_data );
 
-                    // web_accept is returned for A Direct Credit Card (Pro) transaction,
-                    // A Buy Now, Donation or Smart Logo for eBay auctions button
-                    if( $payment_data['type'] ) {
-
+                    if( preg_match( '/^Credit.*/', $payment_data['type'] ) ) {
+                        
                         // If the payment has already been completed do nothing
                         // if( $payment->status == 1 )
                         //     return;
 
                         // If the status is completed update the payment and also activate the member subscriptions
-                        if( $payment_data['status'] == 1 ) {
+                        if( 'completed' == $payment_data['status'] ) {
 
                             $payment->log_data( 'ecpay_waiting', array( 
                                 'data' => $post_data, 

@@ -136,7 +136,8 @@ endif;
 
 /**
  * Add custom log messages for the ECPay Standard gateway
- *
+ * @since 1.0.0
+ * @param string $message can be manually modified
  */
 if ( !function_exists( 'pms_ecpay_payment_logs_system_error_messages' ) ) :
 function pms_ecpay_payment_logs_system_error_messages( $message, $log ) {
@@ -153,7 +154,7 @@ function pms_ecpay_payment_logs_system_error_messages( $message, $log ) {
             $message = __( 'User sent to <strong>ECPay Checkout</strong> to continue the payment process.', 'pms-taiwan-gateways' );
             break;
         case 'ecpay_waiting':
-            $message = __( 'Waiting to receive Instant Payment Notification (IPN) from <strong>ECPay</strong>.', 'pms-taiwan-gateways' );
+            $message = __( 'Waiting to receive notifications from <strong>ECPay</strong>.', 'pms-taiwan-gateways' );
             break;
         case 'ecpay_received':
             $message = __( 'Payment received from ECPay.', 'pms-taiwan-gateways' );
@@ -173,51 +174,12 @@ endif;
  * Add Results to Thankyou page.
  */
 function ecpay_thankyou() {
-    if ( isset( $_POST['RtnCode'] ) && 1 == $_POST['Rtn'] ) {
+    if ( isset( $_POST['RtnCode'] ) && 1 == $_POST['RtnCode'] ) {
         echo sprintf( esc_html__( 'ECPay completed, transactionID is %s', 'pms-taiwan-gateways', $_POST['MerchantTradeNo'] ) );
     } else {
         echo sprintf( 'ECPay is not completed' );
     }
     ?>
-    <h2>POST</h2>
-<table>
-<?php 
 
-
-    foreach ($_POST as $key => $value) {
-        echo "<tr>";
-        echo "<td>";
-        echo $key;
-        echo "</td>";
-        echo "<td>";
-        echo $value;
-        echo "</td>";
-        echo "</tr>";
-    }
-
-
-?>
-</table>
-
-<h2>REQUEST</h2>
-
-<table>
-<?php 
-
-
-    foreach ($_REQUEST as $key => $value) {
-        echo "<tr>";
-        echo "<td>";
-        echo $key;
-        echo "</td>";
-        echo "<td>";
-        echo $value;
-        echo "</td>";
-        echo "</tr>";
-    }
-
-
-?>
-</table>
 <?php }
 add_action( 'pms_member_account_before_subscriptions_tab','ecpay_thankyou');
