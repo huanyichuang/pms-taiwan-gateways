@@ -114,6 +114,8 @@ class PMS_Taiwan_Gateways {
 		/**
 		 * The class responsible for integration with the plugin Paid Member Subscriptions.
 		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/gateways/ecpay/class-ecpay-verify.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/gateways/ecpay/class-ecpay-sdk.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/gateways/ecpay/class-ecpay.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/gateways/ecpay/functions-ecpay.php';
 		

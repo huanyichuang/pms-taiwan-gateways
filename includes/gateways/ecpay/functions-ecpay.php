@@ -14,37 +14,39 @@ if ( !function_exists( 'pms_add_settings_content_ecpay' ) ) :
         ?>
 
         <div class="pms-payment-gateway-wrapper">
-            <h4 class="pms-payment-gateway-title"><?php echo apply_filters( 'pms_settings_page_payment_gateway_ecpay_title', __( 'ECPay Standard', 'applemintlab' ) ); ?></h4>
+            <h4 class="pms-payment-gateway-title"><?php echo apply_filters( 'pms_settings_page_payment_gateway_ecpay_title', __( 'ECPay Standard', 'pms-taiwan-gateways' ) ); ?></h4>
 
             <div class="pms-form-field-wrapper">
-                <label class="pms-form-field-label" for="ecpay-standard-merchant"><?php _e( 'ECPay Merchant ID', 'applemintlab' ); ?></label>
-                <input id="ecpay-standard-merchant" type="text" name="pms_payments_settings[gateways][ecpay][merchant]" value="<?php echo isset( $options['gateways']['ecpay']['merchant' ]) ? $options['gateways']['ecpay']['merchant'] : ''; ?>" class="widefat" />
+                <label class="pms-form-field-label" for="ecpay-merchant"><?php _e( 'ECPay Merchant ID', 'pms-taiwan-gateways' ); ?></label>
+                <input id="ecpay-merchant" type="text" name="pms_payments_settings[gateways][ecpay][merchant]" value="<?php echo isset( $options['gateways']['ecpay']['merchant' ]) ? $options['gateways']['ecpay']['merchant'] : ''; ?>" class="widefat" />
 
                 <input type="hidden" name="pms_payments_settings[gateways][ecpay][name]" value="ECPay" />
 
-                <p class="description"><?php _e( 'Enter your ECPay e-mail address', 'applemintlab' ); ?></p>
+                <p class="description"><?php _e( 'Enter your ECPay e-mail address', 'pms-taiwan-gateways' ); ?></p>
             </div>
 
             <div class="pms-form-field-wrapper">
-                <label class="pms-form-field-label" for="ecpay-standard-hash-key"><?php _e( 'ECPay Hash Key', 'applemintlab' ); ?></label>
-                <input id="ecpay-standard-hash-key" type="text" name="pms_payments_settings[gateways][ecpay][hash_key]" value="<?php echo isset( $options['gateways']['ecpay']['hash_key' ]) ? $options['gateways']['ecpay']['hash_key'] : ''; ?>" class="widefat" />
+                <label class="pms-form-field-label" for="ecpay-hash-key"><?php _e( 'ECPay Hash Key', 'pms-taiwan-gateways' ); ?></label>
+                <input id="ecpay-hash-key" type="text" name="pms_payments_settings[gateways][ecpay][hash_key]" value="<?php echo isset( $options['gateways']['ecpay']['hash_key' ]) ? $options['gateways']['ecpay']['hash_key'] : ''; ?>" class="widefat" />
 
-                <p class="description"><?php _e( 'ECPay E-mail address to use for test transactions', 'applemintlab' ); ?></p>
+                <p class="description"><?php _e( 'ECPay E-mail address to use for test transactions', 'pms-taiwan-gateways' ); ?></p>
             </div>
 
             <div class="pms-form-field-wrapper">
-                <label class="pms-form-field-label" for="ecpay-standard-hash-iv"><?php _e( 'ECPay Hash IV', 'applemintlab' ); ?></label>
-                <input id="ecpay-standard-hash-iv" type="text" name="pms_payments_settings[gateways][ecpay][hash_iv]" value="<?php echo isset( $options['gateways']['ecpay']['hash_iv' ]) ? $options['gateways']['ecpay']['hash_iv'] : ''; ?>" class="widefat" />
+                <label class="pms-form-field-label" for="ecpay-hash-iv"><?php _e( 'ECPay Hash IV', 'pms-taiwan-gateways' ); ?></label>
+                <input id="ecpay-hash-iv" type="text" name="pms_payments_settings[gateways][ecpay][hash_iv]" value="<?php echo isset( $options['gateways']['ecpay']['hash_iv' ]) ? $options['gateways']['ecpay']['hash_iv'] : ''; ?>" class="widefat" />
 
-                <p class="description"><?php _e( 'Enter your ECPay e-mail address', 'applemintlab' ); ?></p>
+                <p class="description"><?php _e( 'Enter your ECPay e-mail address', 'pms-taiwan-gateways' ); ?></p>
+            </div>
+
+            <div class="pms-form-field-wrapper">
+                <label class="pms-form-field-label" for="ecpay-return-url"><?php _e( 'ECPay Return URL', 'pms-taiwan-gateways' ); ?></label>
+                <input id="ecpay-return-url" type="text" name="pms_payments_settings[gateways][ecpay][return_url]" value="<?php echo isset( $options['gateways']['ecpay']['return_url' ]) ? $options['gateways']['ecpay']['return_url'] : ''; ?>" class="widefat" />
+
+                <p class="description"><?php _e( 'Enter your ECPay e-mail address', 'pms-taiwan-gateways' ); ?></p>
             </div>
 
             <?php do_action( 'pms_settings_page_payment_gateway_ecpay_extra_fields', $options ); ?>
-
-            <!-- IPN Message -->
-            <p class="pms-ipn-notice">
-                <?php printf( __( 'In order for <strong>ECPay payments to work correctly</strong>, you need to setup the IPN Url in your ECPay account. %sMore info%s', 'applemintlab' ), '<a href="https://www.cozmoslabs.com/docs/applemintlab/member-payments/#IPN_for_ECPay_gateways">', '</a>' ); ?>
-            </p>
 
         </div>
 
@@ -65,11 +67,11 @@ function pms_ecpay_email_address_admin_warning() {
 
     $are_active = array_intersect( array( 'ecpay', 'ecpay_express', 'ecpay_pro' ), pms_get_active_payment_gateways() );
 
-    if( !empty( $are_active ) && pms_get_ecpay_email() === false ) {
+    if( !empty( $are_active ) && pms_get_ecpay_merchant() === false ) {
 
         echo '<div class="pms-warning-message-wrapper">';
-            echo '<p>' . sprintf( __( 'Your <strong>ECPay Email Address</strong> is missing. In order to make payments you will need to add the Email Address of your ECPay account %1$s here %2$s.', 'applemintlab' ), '<a href="' . admin_url( 'admin.php?page=pms-settings-page&tab=payments' ) .'" target="_blank">', '</a>' ) . '</p>';
-            echo '<p><em>' . __( 'This message is visible only by Administrators.', 'applemintlab' ) . '</em></p>';
+            echo '<p>' . sprintf( __( 'Your <strong>ECPay Email Address</strong> is missing. In order to make payments you will need to add the Email Address of your ECPay account %1$s here %2$s.', 'pms-taiwan-gateways' ), '<a href="' . admin_url( 'admin.php?page=pms-settings-page&tab=payments' ) .'" target="_blank">', '</a>' ) . '</p>';
+            echo '<p><em>' . __( 'This message is visible only by Administrators.', 'pms-taiwan-gateways' ) . '</em></p>';
         echo '</div>';
 
     }
@@ -97,10 +99,10 @@ function pms_wppb_ecpay_email_address_admin_warning() {
     $are_active = array_intersect( array( 'ecpay', 'ecpay_express', 'ecpay_pro' ), pms_get_active_payment_gateways() );
 
     foreach( $fields as $field ) {
-        if ( $field['field'] == 'Subscription Plans' && !empty( $are_active ) && pms_get_ecpay_email() === false ) {
+        if ( $field['field'] == 'Subscription Plans' && !empty( $are_active ) && pms_get_ecpay_merchant() === false ) {
             echo '<div class="pms-warning-message-wrapper">';
-                echo '<p>' . sprintf( __( 'Your <strong>ECPay Email Address</strong> is missing. In order to make payments you will need to add the Email Address of your ECPay account %1$s here %2$s.', 'applemintlab' ), '<a href="' . admin_url( 'admin.php?page=pms-settings-page&tab=payments' ) .'" target="_blank">', '</a>' ) . '</p>';
-                echo '<p><em>' . __( 'This message is visible only by Administrators.', 'applemintlab' ) . '</em></p>';
+                echo '<p>' . sprintf( __( 'Your <strong>ECPay Email Address</strong> is missing. In order to make payments you will need to add the Email Address of your ECPay account %1$s here %2$s.', 'pms-taiwan-gateways' ), '<a href="' . admin_url( 'admin.php?page=pms-settings-page&tab=payments' ) .'" target="_blank">', '</a>' ) . '</p>';
+                echo '<p><em>' . __( 'This message is visible only by Administrators.', 'pms-taiwan-gateways' ) . '</em></p>';
             echo '</div>';
 
             break;
@@ -114,10 +116,10 @@ endif;
 /**
  * Returns the ECPay Email Address
  *
- * @since 1.8.5
+ * @since 1.0.0
  */
-if ( !function_exists( 'pms_get_ecpay_email' ) ) :
-function pms_get_ecpay_email() {
+if ( !function_exists( 'pms_get_ecpay_merchant' ) ) :
+function pms_get_ecpay_merchant() {
     $settings = get_option( 'pms_payments_settings' );
 
     $slug = 'merchant';
@@ -148,16 +150,16 @@ function pms_ecpay_payment_logs_system_error_messages( $message, $log ) {
 
     switch( $log['type'] ) {
         case 'ecpay_to_checkout':
-            $message = __( 'User sent to <strong>ECPay Checkout</strong> to continue the payment process.', 'applemintlab' );
+            $message = __( 'User sent to <strong>ECPay Checkout</strong> to continue the payment process.', 'pms-taiwan-gateways' );
             break;
-        case 'ecpay_ipn_waiting':
-            $message = __( 'Waiting to receive Instant Payment Notification (IPN) from <strong>ECPay</strong>.', 'applemintlab' );
+        case 'ecpay_waiting':
+            $message = __( 'Waiting to receive Instant Payment Notification (IPN) from <strong>ECPay</strong>.', 'pms-taiwan-gateways' );
             break;
-        case 'ecpay_ipn_received':
-            $message = __( 'Instant Payment Notification (IPN) received from ECPay.', 'applemintlab' );
+        case 'ecpay_received':
+            $message = __( 'Payment received from ECPay.', 'pms-taiwan-gateways' );
             break;
-        case 'ecpay_ipn_not_received':
-            $message = __( 'Instant Payment Notification (IPN) not received from ECPay.', 'applemintlab' );
+        case 'ecpay_not_received':
+            $message = __( 'Payment not received from ECPay.', 'pms-taiwan-gateways' );
             break;
     }
 
@@ -166,3 +168,56 @@ function pms_ecpay_payment_logs_system_error_messages( $message, $log ) {
 }
 add_filter( 'pms_payment_logs_system_error_messages', 'pms_ecpay_payment_logs_system_error_messages', 10, 2 );
 endif;
+
+/**
+ * Add Results to Thankyou page.
+ */
+function ecpay_thankyou() {
+    if ( isset( $_POST['RtnCode'] ) && 1 == $_POST['Rtn'] ) {
+        echo sprintf( esc_html__( 'ECPay completed, transactionID is %s', 'pms-taiwan-gateways', $_POST['MerchantTradeNo'] ) );
+    } else {
+        echo sprintf( 'ECPay is not completed' );
+    }
+    ?>
+    <h2>POST</h2>
+<table>
+<?php 
+
+
+    foreach ($_POST as $key => $value) {
+        echo "<tr>";
+        echo "<td>";
+        echo $key;
+        echo "</td>";
+        echo "<td>";
+        echo $value;
+        echo "</td>";
+        echo "</tr>";
+    }
+
+
+?>
+</table>
+
+<h2>REQUEST</h2>
+
+<table>
+<?php 
+
+
+    foreach ($_REQUEST as $key => $value) {
+        echo "<tr>";
+        echo "<td>";
+        echo $key;
+        echo "</td>";
+        echo "<td>";
+        echo $value;
+        echo "</td>";
+        echo "</tr>";
+    }
+
+
+?>
+</table>
+<?php }
+add_action( 'pms_member_account_before_subscriptions_tab','ecpay_thankyou');

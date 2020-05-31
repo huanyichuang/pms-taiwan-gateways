@@ -75,3 +75,11 @@ if ( !function_exists( 'pms_custom_gateway' ) ) {
 	}
 }
 add_filter( 'pms_payment_gateways', 'pms_custom_gateway', 101, 1 );
+
+if ( !function_exists( 'pms_add_ecpay_payment_type' ) ) {
+	function pms_add_ecpay_payment_type( $arr ){
+		$arr['web_accept_ecpay'] = __( 'ECPay - One-Time Payment', 'pms-taiwan-gateways' );
+		return $arr;
+	}
+}
+add_filter( 'pms_payment_types', 'pms_add_ecpay_payment_type', 10, 1 );

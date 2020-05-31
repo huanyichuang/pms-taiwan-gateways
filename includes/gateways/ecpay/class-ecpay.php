@@ -28,7 +28,7 @@ function pms_ecpay_extend() {
              */
             public function init() {
 
-                $this->supports = apply_filters( 'pms_payment_gateway_paypal_standard_supports', array( 'gateway_scheduled_payments' ) );
+                $this->supports = apply_filters( 'pms_payment_gateway_ecpay_supports', array( 'gateway_scheduled_payments' ) );
 
             }
 
@@ -47,20 +47,22 @@ function pms_ecpay_extend() {
 
                 //Update payment type
                 $payment = pms_get_payment( $this->payment_id );
-                $payment->update( array( 'type' => apply_filters( 'pms_paypal_standard_payment_type', 'web_accept_paypal_standard', $this, $settings ) ) );
+                $payment-> update( array( 'type' => apply_filters( 'pms_ecpay_payment_type', 'web_accept_ecpay', $this, $settings ) ) );
 
 
                 // Set the notify URL
-                $notify_url = home_url() . '/?pay_gate_listener=paypal_ipn';
+                $notify_url = home_url() . '/?pay_gate_listener=ecpay';
 
                 if( pms_is_payment_test_mode() )
-                    $paypal_link = 'https://www.sandbox.paypal.com/cgi-bin/webscr/?';
+                    $ecpay_link = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5';
                 else
-                    $paypal_link = 'https://www.paypal.com/cgi-bin/webscr/?';
+                    $ecpay_link = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5';
 
-                $paypal_args = array(
-                    'cmd'           => '_xclick',
-                    'business'      => trim( pms_get_paypal_email() ),
+                $ecpay_args = array(
+                    // 'cmd'           => '_xclick',
+                    'business'      => trim( pms_get_ecpay_merchant() ),
+                    'hash_key'      => trim( $settings['gateways']['ecpay']['hash_key'] ),
+                    'hash_iv'       => trim( $settings['gateways']['ecpay']['hash_iv'] ),
                     'email'         => $this->user_email,
                     'item_name'     => $this->subscription_plan->name,
                     'item_number'   => $this->subscription_plan->id,
@@ -68,54 +70,86 @@ function pms_ecpay_extend() {
                     'amount'        => $this->amount,
                     'tax'           => 0,
                     'custom'        => $this->payment_id,
-                    'notify_url'    => $notify_url,
-                    'return'        => add_query_arg( array( 'pms_gateway_payment_id' => base64_encode($this->payment_id), 'pmsscscd' => base64_encode('subscription_plans') ), $this->redirect_url ),
-                    'bn'            => 'Cozmoslabs_SP',
+                    'notify_url'    => isset( $notify_url ) ? $notify_url : '',
+                    'return_url'    => isset( $notify_url ) ? $notify_url : '',
+                    //'return'        => add_query_arg( array( 'pms_gateway_payment_id' => base64_encode($this->payment_id), 'pmsscscd' => base64_encode('subscription_plans') ), $this->redirect_url ),
+                    // 'bn'            => 'Cozmoslabs_SP',
                     'charset'       => 'UTF-8',
                     'no_shipping'   => 1
                 );
+                
 
-                $paypal_link .= http_build_query( apply_filters( 'pms_paypal_standard_args', $paypal_args, $this, $settings ) );
+                //$ecpay_link .= http_build_query( apply_filters( 'pms_paypal_standard_args', $ecpay_args, $this, $settings ) );
 
-
-                do_action( 'pms_before_paypal_redirect', $paypal_link, $this, $settings );
-
-                $payment->log_data( 'paypal_to_checkout' );
+                try {
+                    /** 組合綠界參數
+                     * CustomField1 儲存 Payment ID 資料，用來比對交易
+                     * CustomField2 儲存方案 ID，用來比對方案
+                     */
+                    $obj = new ECPay_AllInOne();
+                    //服務參數
+                    $obj->ServiceURL  = $ecpay_link;  //服務位置
+                    $obj->HashKey     = $ecpay_args['hash_key'] != '' ? $ecpay_args['hash_key'] : '5294y06JbISpM5x9' ;                                          //測試用Hashkey，請自行帶入ECPay提供的HashKey
+                    $obj->HashIV      = $ecpay_args['hash_iv']  != '' ? $ecpay_args['hash_iv'] : 'v77hoKGq4kWxNNIS' ;                                          //測試用HashIV，請自行帶入ECPay提供的HashIV
+                    $obj->MerchantID  = $ecpay_args['merchant'] != '' ? $ecpay_args['merchant'] : '2000132';                                                    //測試用MerchantID，請自行帶入ECPay提供的MerchantID
+                    $obj->EncryptType = '1';                                                          //CheckMacValue加密類型，請固定填入1，使用SHA256加密
+                    $obj->Send['ReturnURL']         = $ecpay_args['return_url'];
+                    $obj->Send['OrderResultURL']    = $settings['gateways']['ecpay']['return_url'];
+                    $obj->Send['MerchantTradeNo']   = "Test" . time() . $this->payment_id;                           //訂單編號
+                    $obj->Send['MerchantTradeDate'] = date('Y/m/d H:i:s');                        //交易時間
+                    $obj->Send['TotalAmount']       = $this->amount;                                       //交易金額
+                    $obj->Send['TradeDesc']         = "Merchant";                                //交易描述
+                    $obj->Send['ChoosePayment']     = ECPay_PaymentMethod::ALL;                  //付款方式:全功能
+                    $obj->Send['CustomField1']      = $ecpay_args['custom'];
+                    $obj->Send['CustomField2']      = $ecpay_args['item_number'];
+                    array_push($obj->Send['Items'], array(
+                        'Name' => $this->subscription_plan->name, 
+                        'Price' => $this->amount,
+                        'Currency' => $this->currency, 
+                        'Quantity' => $this->amount, 
+                        'URL' => "dedwed"
+                    ));
+                    
+                } catch (Exception $e) {
+                    echo $e->getMessage();
+                }
+                $payment->log_data( 'ecpay_to_checkout' );
 
                 if ( $payment->status != 'completed' && $payment->amount != 0 )
-                    $payment->log_data( 'paypal_ipn_waiting' );
+                    $payment->log_data( 'ecpay_waiting' );
 
                 // Redirect only if tkn is set
                 if( isset( $_POST['pmstkn'] ) ) {
-                    wp_redirect( $paypal_link );
-                    exit;
+                    $obj->CheckOut();
                 }
+
+                do_action( 'pms_before_ecpay_redirect', $ecpay_link, $this, $settings );
 
             }
 
 
             /*
-            * Process IPN sent by PayPal
+            * Process Post Codes sent by ECPay
             *
             */
             public function process_webhooks() {
 
-                if( !isset( $_GET['pay_gate_listener'] ) || $_GET['pay_gate_listener'] != 'paypal_ipn' )
+                if( !isset( $_GET['pay_gate_listener'] ) || $_GET['pay_gate_listener'] != 'ecpay' )
                     return;
 
-                // Init IPN Verifier
-                $ipn_verifier = new PMS_IPN_Verifier();
+                // Init ECPay Verifier
+                $ecpay_verifier = new PMS_ECPay_Verifier();
 
                 if( pms_is_payment_test_mode() )
-                    $ipn_verifier->is_sandbox = true;
+                    $ecpay_verifier->is_sandbox = true;
 
 
-                $verified = false;
+                $verified = true;
 
-                // Process the IPN
+                // Process the ECPay
                 try {
-                    if( $ipn_verifier->checkRequestPost() )
-                        $verified = $ipn_verifier->validate();
+                    if( $ecpay_verifier->checkRequestPost() )
+                        $verified = $ecpay_verifier->validate();
                 } catch ( Exception $e ) {
 
                 }
@@ -125,8 +159,8 @@ function pms_ecpay_extend() {
 
                     $post_data = $_POST;
 
-                    // Get payment id from custom variable sent by IPN
-                    $payment_id = isset( $post_data['custom'] ) ? $post_data['custom'] : 0;
+                    // Get payment id from custom variable sent by ECPay
+                    $payment_id = isset( $post_data['CustomField1'] ) ? $post_data['CustomField1'] : 29;
 
                     // Get the payment
                     $payment = pms_get_payment( $payment_id );
@@ -134,36 +168,44 @@ function pms_ecpay_extend() {
                     // Get user id from the payment
                     $user_id = $payment->user_id;
 
-                    $payment_data = apply_filters( 'pms_paypal_ipn_payment_data', array(
+                    /** 綠界回傳資料 */
+                    $payment_data = apply_filters( 'pms_ecpay_payment_data', array(
                         'payment_id'     => $payment_id,
                         'user_id'        => $user_id,
-                        'type'           => $post_data['txn_type'],
-                        'status'         => strtolower($post_data['payment_status']),
-                        'transaction_id' => $post_data['txn_id'],
-                        'amount'         => $post_data['mc_gross'],
-                        'date'           => $post_data['payment_date'],
-                        'subscription_id'=> $post_data['item_number']
+                        'type'           => $post_data['PaymentType'],
+                        'status'         => $post_data['RtnCode'] == 1 ? 'completed' : 'pending',
+                        'transaction_id' => $post_data['MerchantTradeNo'],
+                        'amount'         => $post_data['TradeAmt'],
+                        'date'           => $post_data['PaymentDate'],
+                        'subscription_id'=> $post_data['CustomField2']
                     ), $post_data );
-
 
                     // web_accept is returned for A Direct Credit Card (Pro) transaction,
                     // A Buy Now, Donation or Smart Logo for eBay auctions button
-                    if( $payment_data['type'] == 'web_accept' ) {
+                    if( $payment_data['type'] ) {
 
                         // If the payment has already been completed do nothing
-                        if( $payment->status == 'completed' )
-                            return;
+                        // if( $payment->status == 1 )
+                        //     return;
 
                         // If the status is completed update the payment and also activate the member subscriptions
-                        if( $payment_data['status'] == 'completed' ) {
+                        if( $payment_data['status'] == 1 ) {
 
-                            $payment->log_data( 'paypal_ipn_received', array( 'data' => $post_data, 'desc' => 'paypal IPN' ) );
+                            $payment->log_data( 'ecpay_waiting', array( 
+                                'data' => $post_data, 
+                                'desc' => 'ECPay Response' 
+                            ) );
 
                             // Complete payment
-                            $payment->update( array( 'status' => $payment_data['status'], 'transaction_id' => $payment_data['transaction_id'] ) );
+                            $payment->update( array( 
+                                'status' => $payment_data['status'], 
+                                'transaction_id' => $payment_data['transaction_id'] 
+                            ) );
 
                             // Get member subscription
-                            $member_subscriptions = pms_get_member_subscriptions( array( 'user_id' => $payment_data['user_id'], 'subscription_plan_id' => $payment_data['subscription_id'] ) );
+                            $member_subscriptions = pms_get_member_subscriptions( array( 
+                                'user_id' => $payment_data['user_id'], 
+                                'subscription_plan_id' => $payment_data['subscription_id'] ) );
 
                             foreach( $member_subscriptions as $member_subscription ) {
 
@@ -187,12 +229,14 @@ function pms_ecpay_extend() {
                                 $member_subscription->update( array( 'expiration_date' => $member_subscription_expiration_date, 'status' => 'active' ) );
 
                                 if( $member_subscription->status == 'pending' )
-                                    pms_add_member_subscription_log( $member_subscription->id, 'subscription_activated', array( 'until' => $member_subscription_expiration_date ) );
+                                    pms_add_member_subscription_log( $member_subscription->id, 'subscription_activated', array( 
+                                        'until' => $member_subscription_expiration_date ) );
                                 else
-                                    pms_add_member_subscription_log( $member_subscription->id, 'subscription_renewed_manually', array( 'until' => $member_subscription_expiration_date ) );
+                                    pms_add_member_subscription_log( $member_subscription->id, 'subscription_renewed_manually', array( 
+                                        'until' => $member_subscription_expiration_date ) );
 
                                 //Can be a renewal payment or a new payment
-                                do_action( 'pms_paypal_web_accept_after_subscription_activation', $member_subscription, $payment_data, $post_data );
+                                do_action( 'pms_ecpay_accept_after_subscription_activation', $member_subscription, $payment_data, $post_data );
                             }
 
                             /*
@@ -224,23 +268,29 @@ function pms_ecpay_extend() {
 
                                 pms_add_member_subscription_log( $current_subscription->id, 'subscription_upgrade_success', array( 'old_plan' => $old_plan_id, 'new_plan' => $new_subscription_plan->id ) );
 
-                                do_action( 'pms_paypal_web_accept_after_upgrade_subscription', $member_subscription_plan->id, $payment_data, $post_data );
+                                do_action( 'pms_ecpay_accept_after_upgrade_subscription', $member_subscription_plan->id, $payment_data, $post_data );
 
                             }
 
                         // If payment status is not complete, something happened, so log it in the payment
                         } else {
 
-                            $payment->log_data( 'payment_failed', array( 'data' => $post_data, 'desc' => 'ipn response') );
+                            $payment->log_data( 'payment_failed', array( 
+                                'data' => $post_data, 
+                                'desc' => 'ipn response'
+                            ) );
 
                             // Add the transaction ID
-                            $payment->update( array( 'transaction_id' => $payment_data['transaction_id'], 'status' => 'failed' ) );
+                            $payment->update( array( 
+                                'transaction_id' => $payment_data['transaction_id'], 
+                                'status' => 'failed' 
+                            ) );
 
                         }
 
                     }
 
-                    do_action( 'pms_paypal_ipn_listener_verified', $payment_data, $post_data );
+                    do_action( 'pms_ecpay_listener_verified', $payment_data, $post_data );
 
                 }
 
@@ -253,7 +303,7 @@ function pms_ecpay_extend() {
             */
             public function validate_credentials() {
 
-                if ( pms_get_paypal_email() === false )
+                if ( pms_get_ecpay_merchant() === false )
                     pms_errors()->add( 'form_general', __( 'The selected gateway is not configured correctly: <strong>PayPal Address is missing</strong>. Contact the system administrator.', 'paid-member-subscriptions' ) );
 
             }
