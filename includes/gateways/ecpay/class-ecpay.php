@@ -77,7 +77,6 @@ function pms_ecpay_extend() {
                     'charset'       => 'UTF-8',
                     'no_shipping'   => 1
                 );
-                
 
                 //$ecpay_link .= http_build_query( apply_filters( 'pms_paypal_standard_args', $ecpay_args, $this, $settings ) );
 
@@ -89,9 +88,9 @@ function pms_ecpay_extend() {
                     $obj = new ECPay_AllInOne();
                     //服務參數
                     $obj->ServiceURL  = $ecpay_link;  //服務位置
-                    $obj->HashKey     = $ecpay_args['hash_key'] != '' ? $ecpay_args['hash_key'] : '5294y06JbISpM5x9' ;                                          //測試用Hashkey，請自行帶入ECPay提供的HashKey
-                    $obj->HashIV      = $ecpay_args['hash_iv']  != '' ? $ecpay_args['hash_iv'] : 'v77hoKGq4kWxNNIS' ;                                          //測試用HashIV，請自行帶入ECPay提供的HashIV
-                    $obj->MerchantID  = $ecpay_args['merchant'] != '' ? $ecpay_args['merchant'] : '2000132';                                                    //測試用MerchantID，請自行帶入ECPay提供的MerchantID
+                    $obj->HashKey     = $settings['gateways']['ecpay']['hash_key'];     //測試用Hashkey，請自行帶入ECPay提供的HashKey
+                    $obj->HashIV      = $settings['gateways']['ecpay']['hash_iv'];      //測試用HashIV，請自行帶入ECPay提供的HashIV
+                    $obj->MerchantID  = pms_get_ecpay_merchant();               //測試用MerchantID，請自行帶入ECPay提供的MerchantID
                     $obj->EncryptType = '1';                                                          //CheckMacValue加密類型，請固定填入1，使用SHA256加密
                     $obj->Send['ReturnURL']         = $ecpay_args['return_url'];
                     $obj->Send['OrderResultURL']    = $settings['gateways']['ecpay']['return_url'];
