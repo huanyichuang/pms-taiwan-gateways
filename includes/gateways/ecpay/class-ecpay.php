@@ -94,7 +94,7 @@ function pms_ecpay_extend() {
                     $obj->EncryptType = '1';                                                          //CheckMacValue加密類型，請固定填入1，使用SHA256加密
                     $obj->Send['ReturnURL']         = $ecpay_args['return_url'];
                     $obj->Send['OrderResultURL']    = $settings['gateways']['ecpay']['return_url'];
-                    $obj->Send['MerchantTradeNo']   = "Test" . time() . $this->payment_id;                           //訂單編號
+                    $obj->Send['MerchantTradeNo']   = "amlab" . time() . $this->payment_id;                           //訂單編號
                     $obj->Send['MerchantTradeDate'] = date('Y/m/d H:i:s');                        //交易時間
                     $obj->Send['TotalAmount']       = $this->amount;                                       //交易金額
                     $obj->Send['TradeDesc']         = "Merchant";                                //交易描述
