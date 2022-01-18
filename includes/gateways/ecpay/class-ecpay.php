@@ -28,7 +28,7 @@ function pms_ecpay_extend() {
              */
             public function init() {
 
-                $this->supports = apply_filters( 'pms_payment_gateway_ecpay_supports', array( 'gateway_scheduled_payments' ) );
+                $this->supports = apply_filters( 'pms_payment_gateway_ecpay_supports', array( 'gateway_scheduled_payments', 'recurring_payments' ) );
 
             }
 
@@ -75,8 +75,20 @@ function pms_ecpay_extend() {
                     //'return'        => add_query_arg( array( 'pms_gateway_payment_id' => base64_encode($this->payment_id), 'pmsscscd' => base64_encode('subscription_plans') ), $this->redirect_url ),
                     // 'bn'            => 'Cozmoslabs_SP',
                     'charset'       => 'UTF-8',
-                    'no_shipping'   => 1
+                    'no_shipping'   => 1,
                 );
+				if( pms_is_payment_test_mode() ) {
+					$ecpay_args['business'] = 2000132;
+					$ecpay_args['hash_key'] = '5294y06JbISpM5x9';
+					$ecpay_args['hash_iv']  = 'v77hoKGq4kWxNNIS';
+				}
+				if( !empty( $settings['recurring'] ) ) {
+					$ecpay_args['PeriodAmount']    = $this->amount;
+					$ecpay_args['PeriodType']      = 'M';
+					$ecpay_args['Frequency']       = 1;
+					$ecpay_args['ExecTimes']       = 99;
+					$ecpay_args['PeriodReturnURL'] = $ecpay_args['return_url'] ?: '';
+				}
 
                 //$ecpay_link .= http_build_query( apply_filters( 'pms_paypal_standard_args', $ecpay_args, $this, $settings ) );
 
@@ -88,26 +100,33 @@ function pms_ecpay_extend() {
                     $obj = new ECPay_AllInOne();
                     //服務參數
                     $obj->ServiceURL  = $ecpay_link;  //服務位置
-                    $obj->HashKey     = $settings['gateways']['ecpay']['hash_key'];     //測試用Hashkey，請自行帶入ECPay提供的HashKey
-                    $obj->HashIV      = $settings['gateways']['ecpay']['hash_iv'];      //測試用HashIV，請自行帶入ECPay提供的HashIV
-                    $obj->MerchantID  = pms_get_ecpay_merchant();               //測試用MerchantID，請自行帶入ECPay提供的MerchantID
+                    $obj->HashKey     = $ecpay_args['hash_key'];     //測試用Hashkey，請自行帶入ECPay提供的HashKey
+                    $obj->HashIV      = $ecpay_args['hash_iv'];      //測試用HashIV，請自行帶入ECPay提供的HashIV
+                    $obj->MerchantID  = $ecpay_args['business'];     //測試用MerchantID，請自行帶入ECPay提供的MerchantID
                     $obj->EncryptType = '1';                                                          //CheckMacValue加密類型，請固定填入1，使用SHA256加密
                     $obj->Send['ReturnURL']         = $ecpay_args['return_url'];
-                    $obj->Send['OrderResultURL']    = $settings['gateways']['ecpay']['return_url'];
+                    $obj->Send['OrderResultURL']    = $ecpay_args['return_url'];
                     $obj->Send['MerchantTradeNo']   = "amlab" . time() . $this->payment_id;                           //訂單編號
                     $obj->Send['MerchantTradeDate'] = date('Y/m/d H:i:s');                        //交易時間
                     $obj->Send['TotalAmount']       = $this->amount;                                       //交易金額
                     $obj->Send['TradeDesc']         = "Merchant";                                //交易描述
-                    $obj->Send['ChoosePayment']     = ECPay_PaymentMethod::ALL;                  //付款方式:全功能
+                    $obj->Send['ChoosePayment']     = ECPay_PaymentMethod::Credit;                  //付款方式: 僅信用卡
                     $obj->Send['CustomField1']      = $ecpay_args['custom'];
                     $obj->Send['CustomField2']      = $ecpay_args['item_number'];
                     array_push($obj->Send['Items'], array(
                         'Name' => $this->subscription_plan->name, 
                         'Price' => $this->amount,
                         'Currency' => $this->currency, 
-                        'Quantity' => $this->amount, 
-                        'URL' => "dedwed"
+                        'Quantity' => 1, 
+                        'URL' => $this->subscription_plan->name,
                     ));
+					if( !empty( $settings['recurring'] ) ) {
+						$obj->Send['PeriodAmount']    = $this->amount;
+						$obj->Send['PeriodType']      = 'M';
+						$obj->Send['Frequency']       = 1;
+						$obj->Send['ExecTimes']       = 99;
+						$obj->Send['PeriodReturnURL'] = $ecpay_args['PeriodReturnURL'];
+					}
                     
                 } catch (Exception $e) {
                     echo $e->getMessage();

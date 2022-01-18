@@ -48,19 +48,19 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-pms-taiwan-gateways.php';
  * then kicking off the plugin from this point in the file does
  * not affect the page life cycle.
  *
- * @since    1.0.0
+ * @since 1.0.0
  */
 function run_pms_taiwan_gateways() {
-
 	$plugin = new PMS_Taiwan_Gateways();
 	$plugin->run();
-
 }
 run_pms_taiwan_gateways();
 
 /**
  * Add custom gateway for pms.
+ * 
  * @since 1.0.0
+ * 
  * @param array $arr will retrieve the default gateways, 
  * and can add other gateways with the hook `pms_payment_gateways`
  */
