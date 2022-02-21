@@ -127,6 +127,19 @@ function pms_ecpay_extend() {
 						$obj->Send['ExecTimes']       = 99;
 						$obj->Send['PeriodReturnURL'] = $ecpay_args['PeriodReturnURL'];
 					}
+					if ( 'zh_TW' !== get_locale() ) {
+						$obj->Send['Language']      = 'ENG';
+					}
+
+					if ( 'ja' === get_locale() ) {
+						$obj->Send['Language']      = 'JPN';
+					}
+
+					$payment->log_data( 'ecpay_locale', array(
+						'sys_locale'    => get_locale(),
+						'ecpay_locale'  => $obj->Send['Language'],
+						'obj'           => $obj,
+					) );
                     
                 } catch (Exception $e) {
                     echo $e->getMessage();
