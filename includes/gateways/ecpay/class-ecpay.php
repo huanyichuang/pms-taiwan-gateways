@@ -128,11 +128,11 @@ function pms_ecpay_extend() {
 						$obj->Send['PeriodReturnURL'] = $ecpay_args['PeriodReturnURL'];
 					}
 					if ( 'zh_TW' !== get_locale() ) {
-						$obj->Send['Language']      = 'ENG';
+						$obj->SendExtend['Language']      = 'ENG';
 					}
 
 					if ( 'ja' === get_locale() ) {
-						$obj->Send['Language']      = 'JPN';
+						$obj->SendExtend['Language']      = 'JPN';
 					}
 
 					$payment->log_data( 'ecpay_locale', array(
