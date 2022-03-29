@@ -121,11 +121,11 @@ function pms_ecpay_extend() {
                         'URL' => $this->subscription_plan->name,
                     ));
 					if( !empty( $settings['recurring'] ) ) {
-						$obj->Send['PeriodAmount']    = $this->amount;
-						$obj->Send['PeriodType']      = 'M';
-						$obj->Send['Frequency']       = 1;
-						$obj->Send['ExecTimes']       = 99;
-						$obj->Send['PeriodReturnURL'] = $ecpay_args['PeriodReturnURL'];
+						$obj->SendExtend['PeriodAmount']    = $this->amount;
+						$obj->SendExtend['PeriodType']      = 'M';
+						$obj->SendExtend['Frequency']       = 1;
+						$obj->SendExtend['ExecTimes']       = 99;
+						$obj->SendExtend['PeriodReturnURL'] = $ecpay_args['PeriodReturnURL'];
 					}
 					if ( 'zh_TW' !== get_locale() ) {
 						$obj->SendExtend['Language']      = 'ENG';
