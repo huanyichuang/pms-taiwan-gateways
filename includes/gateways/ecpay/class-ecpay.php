@@ -84,9 +84,9 @@ function pms_ecpay_extend() {
 				}
 				if( !empty( $settings['recurring'] ) ) {
 					$ecpay_args['PeriodAmount']    = $this->amount;
-					$ecpay_args['PeriodType']      = 'M';
+					$ecpay_args['PeriodType']      = $settings['gateways']['ecpay']['period'];
 					$ecpay_args['Frequency']       = 1;
-					$ecpay_args['ExecTimes']       = 99;
+					$ecpay_args['ExecTimes']       = $settings['gateways']['ecpay']['exec_time'];
 					$ecpay_args['PeriodReturnURL'] = $ecpay_args['return_url'] ?: '';
 				}
 
@@ -122,9 +122,9 @@ function pms_ecpay_extend() {
                     ));
 					if( !empty( $settings['recurring'] ) ) {
 						$obj->SendExtend['PeriodAmount']    = $this->amount;
-						$obj->SendExtend['PeriodType']      = 'M';
+						$obj->SendExtend['PeriodType']      = $ecpay_args['PeriodType'];
 						$obj->SendExtend['Frequency']       = 1;
-						$obj->SendExtend['ExecTimes']       = 99;
+						$obj->SendExtend['ExecTimes']       = $ecpay_args['ExecTimes'];
 						$obj->SendExtend['PeriodReturnURL'] = $ecpay_args['PeriodReturnURL'];
 					}
 					if ( 'zh_TW' !== get_locale() ) {

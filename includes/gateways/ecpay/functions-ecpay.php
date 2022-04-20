@@ -22,28 +22,46 @@ if ( !function_exists( 'pms_add_settings_content_ecpay' ) ) :
 
                 <input type="hidden" name="pms_payments_settings[gateways][ecpay][name]" value="ECPay" />
 
-                <p class="description"><?php _e( 'Enter your ECPay e-mail address', 'pms-taiwan-gateways' ); ?></p>
+                <p class="description"><?php _e( 'Enter your ECPay Merchant ID', 'pms-taiwan-gateways' ); ?></p>
             </div>
 
             <div class="pms-form-field-wrapper">
                 <label class="pms-form-field-label" for="ecpay-hash-key"><?php _e( 'ECPay Hash Key', 'pms-taiwan-gateways' ); ?></label>
                 <input id="ecpay-hash-key" type="text" name="pms_payments_settings[gateways][ecpay][hash_key]" value="<?php echo isset( $options['gateways']['ecpay']['hash_key' ]) ? $options['gateways']['ecpay']['hash_key'] : ''; ?>" class="widefat" />
 
-                <p class="description"><?php _e( 'ECPay E-mail address to use for test transactions', 'pms-taiwan-gateways' ); ?></p>
+                <p class="description"><?php _e( 'Enter your ECPay Hash Key', 'pms-taiwan-gateways' ); ?></p>
             </div>
 
             <div class="pms-form-field-wrapper">
                 <label class="pms-form-field-label" for="ecpay-hash-iv"><?php _e( 'ECPay Hash IV', 'pms-taiwan-gateways' ); ?></label>
                 <input id="ecpay-hash-iv" type="text" name="pms_payments_settings[gateways][ecpay][hash_iv]" value="<?php echo isset( $options['gateways']['ecpay']['hash_iv' ]) ? $options['gateways']['ecpay']['hash_iv'] : ''; ?>" class="widefat" />
 
-                <p class="description"><?php _e( 'Enter your ECPay e-mail address', 'pms-taiwan-gateways' ); ?></p>
+                <p class="description"><?php _e( 'Enter your ECPay Hash IV', 'pms-taiwan-gateways' ); ?></p>
             </div>
 
             <div class="pms-form-field-wrapper">
                 <label class="pms-form-field-label" for="ecpay-return-url"><?php _e( 'ECPay Return URL', 'pms-taiwan-gateways' ); ?></label>
                 <input id="ecpay-return-url" type="text" name="pms_payments_settings[gateways][ecpay][return_url]" value="<?php echo isset( $options['gateways']['ecpay']['return_url' ]) ? $options['gateways']['ecpay']['return_url'] : ''; ?>" class="widefat" />
 
-                <p class="description"><?php _e( 'Enter your ECPay e-mail address', 'pms-taiwan-gateways' ); ?></p>
+                <p class="description"><?php _e( 'Enter your ECPay return url', 'pms-taiwan-gateways' ); ?></p>
+            </div>
+
+			<div class="pms-form-field-wrapper">
+                <label class="pms-form-field-label" for="ecpay-return-period"><?php _e( 'ECPay Period', 'pms-taiwan-gateways' ); ?></label>
+                <select id="ecpay-return-period" type="text" name="pms_payments_settings[gateways][ecpay][period]" value="<?php echo isset( $options['gateways']['ecpay']['period' ]) ? $options['gateways']['ecpay']['period'] : ''; ?>" class="widefat">
+					<option value="M">Monthly</option>
+					<option value="Y">Annauly</option>
+					<option value="D">Daily</option>
+				</select>
+
+                <p class="description"><?php _e( 'Select your ECPay Period', 'pms-taiwan-gateways' ); ?></p>
+            </div>
+
+			<div class="pms-form-field-wrapper">
+			<label class="pms-form-field-label" for="ecpay-exectime"><?php _e( 'ECPay Execution Time(s)', 'pms-taiwan-gateways' ); ?></label>
+                <input id="ecpay-exectime" type="number" name="pms_payments_settings[gateways][ecpay][exec_time]" value="<?php echo isset( $options['gateways']['ecpay']['exec_time']) ? $options['gateways']['ecpay']['exec_time'] : 12; ?>" class="widefat" min="1" max="12" />
+
+                <p class="description"><?php _e( 'Enter your ECPay execution times', 'pms-taiwan-gateways' ); ?></p>
             </div>
 
             <?php do_action( 'pms_settings_page_payment_gateway_ecpay_extra_fields', $options ); ?>
