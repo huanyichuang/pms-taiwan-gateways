@@ -3,7 +3,7 @@
  * Plugin Name:       Paid Member Subscriptions Taiwan Gateways
  * Plugin URI:        https://www.applemint.tech/
  * Description:       The extension that helps you to add gateways in Taiwan to the plugin Paid Member Subscriptions.
- * Version:           1.0.0
+ * Version:           1.0.2
  * Requires at least: 5.2
  * Requires PHP:      7.3
  * Author:            applemint Ltd.

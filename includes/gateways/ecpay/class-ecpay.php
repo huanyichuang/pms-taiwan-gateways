@@ -53,6 +53,9 @@ function pms_ecpay_extend() {
                 // Set the notify URL
                 $notify_url = home_url() . '/?pay_gate_listener=ecpay';
 
+				// Set the thank you page URL
+				$result_url = $settings['gateways']['ecpay']['result_url'];
+
                 if( pms_is_payment_test_mode() )
                     $ecpay_link = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5';
                 else
@@ -70,8 +73,8 @@ function pms_ecpay_extend() {
                     'amount'        => $this->amount,
                     'tax'           => 0,
                     'custom'        => $this->payment_id,
-                    'notify_url'    => isset( $notify_url ) ? $notify_url : '',
                     'return_url'    => isset( $notify_url ) ? $notify_url : '',
+                    'result_url'    => isset( $result_url ) ? $result_url : '',
                     //'return'        => add_query_arg( array( 'pms_gateway_payment_id' => base64_encode($this->payment_id), 'pmsscscd' => base64_encode('subscription_plans') ), $this->redirect_url ),
                     // 'bn'            => 'Cozmoslabs_SP',
                     'charset'       => 'UTF-8',
@@ -105,7 +108,7 @@ function pms_ecpay_extend() {
                     $obj->MerchantID  = $ecpay_args['business'];     //測試用MerchantID，請自行帶入ECPay提供的MerchantID
                     $obj->EncryptType = '1';                                                          //CheckMacValue加密類型，請固定填入1，使用SHA256加密
                     $obj->Send['ReturnURL']         = $ecpay_args['return_url'];
-                    $obj->Send['OrderResultURL']    = $ecpay_args['return_url'];
+                    $obj->Send['OrderResultURL']    = $ecpay_args['result_url'];
                     $obj->Send['MerchantTradeNo']   = "amlab" . time() . $this->payment_id;                           //訂單編號
                     $obj->Send['MerchantTradeDate'] = date('Y/m/d H:i:s');                        //交易時間
                     $obj->Send['TotalAmount']       = $this->amount;                                       //交易金額
@@ -122,9 +125,9 @@ function pms_ecpay_extend() {
                     ));
 					if( !empty( $settings['recurring'] ) ) {
 						$obj->SendExtend['PeriodAmount']    = $this->amount;
-						$obj->SendExtend['PeriodType']      = $ecpay_args['PeriodType'];
+						$obj->SendExtend['PeriodType']      = isset( $ecpay_args['PeriodType'] ) ? $ecpay_args['PeriodType'] : 'M';
 						$obj->SendExtend['Frequency']       = 1;
-						$obj->SendExtend['ExecTimes']       = $ecpay_args['ExecTimes'];
+						$obj->SendExtend['ExecTimes']       = isset( $ecpay_args['ExecTimes'] ) ? $ecpay_args['ExecTimes'] : 12;
 						$obj->SendExtend['PeriodReturnURL'] = $ecpay_args['PeriodReturnURL'];
 					}
 					if ( 'zh_TW' !== get_locale() ) {
