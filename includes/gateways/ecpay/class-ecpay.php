@@ -116,7 +116,7 @@ function pms_ecpay_extend() {
                      * CustomField1 儲存 Payment ID 資料，用來比對交易
                      * CustomField2 儲存方案 ID，用來比對方案
                      */
-                    $obj              = new ECPay_AllInOne();
+                    $obj              = new PMS_ECPay_AllInOne();
 					$prefix           = isset( $settings['gateways']['ecpay']['prefix'] ) ? $settings['gateways']['ecpay']['prefix'] : '';
                     //服務參數
                     $obj->ServiceURL  = $ecpay_link;                 //服務位置
@@ -130,7 +130,7 @@ function pms_ecpay_extend() {
                     $obj->Send['MerchantTradeDate'] = date('Y/m/d H:i:s');                        //交易時間
                     $obj->Send['TotalAmount']       = $this->amount;                                       //交易金額
                     $obj->Send['TradeDesc']         = "Merchant";                                //交易描述
-                    $obj->Send['ChoosePayment']     = ECPay_PaymentMethod::Credit;                  //付款方式: 僅信用卡
+                    $obj->Send['ChoosePayment']     = PMS_ECPay_PaymentMethod::Credit;                  //付款方式: 僅信用卡
                     $obj->Send['CustomField1']      = $ecpay_args['custom'];
                     $obj->Send['CustomField2']      = $ecpay_args['item_number'];
                     array_push($obj->Send['Items'], array(
