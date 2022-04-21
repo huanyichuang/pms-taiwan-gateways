@@ -86,30 +86,47 @@ function pms_ecpay_extend() {
 					$ecpay_args['hash_iv']  = 'v77hoKGq4kWxNNIS';
 				}
 				if( !empty( $settings['recurring'] ) ) {
-					$ecpay_args['PeriodAmount']    = $this->amount;
-					$ecpay_args['PeriodType']      = $settings['gateways']['ecpay']['period'];
-					$ecpay_args['Frequency']       = 1;
-					$ecpay_args['ExecTimes']       = $settings['gateways']['ecpay']['exec_time'];
-					$ecpay_args['PeriodReturnURL'] = $ecpay_args['return_url'] ?: '';
-				}
+					$duration = $this->subscription_plan->duration;
+					$duration_map = array(
+						'day'      => 'D',
+						'week'     => 'D',
+						'month'    => 'M',
+						'year'     => 'Y',
+					);
+					$duration_unit = $duration_map[$this->subscription_plan->duration_unit];
 
-                //$ecpay_link .= http_build_query( apply_filters( 'pms_paypal_standard_args', $ecpay_args, $this, $settings ) );
+					if ( 'week' === $this->subscription_plan->duration_unit ) {
+						$duration = $duration * 7;
+					}
+
+					$ecpay_args['PeriodAmount']    = $this->amount;
+					$ecpay_args['PeriodType']      = $duration_unit;
+					$ecpay_args['Frequency']       = $duration;
+					$ecpay_args['ExecTimes']       = isset( $settings['gateways']['ecpay']['exec_time'] ) ? $settings['gateways']['ecpay']['exec_time'] : 12;
+					$ecpay_args['PeriodReturnURL'] = $ecpay_args['return_url'] ?: '';
+
+					// $payment->log_data( 'ecpay_period', array(
+					// 	'data' => $ecpay_args,
+					// 	'sub'  => $this->subscription_plan,
+					// ) );
+				}
 
                 try {
                     /** 組合綠界參數
                      * CustomField1 儲存 Payment ID 資料，用來比對交易
                      * CustomField2 儲存方案 ID，用來比對方案
                      */
-                    $obj = new ECPay_AllInOne();
+                    $obj              = new ECPay_AllInOne();
+					$prefix           = isset( $settings['gateways']['ecpay']['prefix'] ) ? $settings['gateways']['ecpay']['prefix'] : '';
                     //服務參數
-                    $obj->ServiceURL  = $ecpay_link;  //服務位置
+                    $obj->ServiceURL  = $ecpay_link;                 //服務位置
                     $obj->HashKey     = $ecpay_args['hash_key'];     //測試用Hashkey，請自行帶入ECPay提供的HashKey
                     $obj->HashIV      = $ecpay_args['hash_iv'];      //測試用HashIV，請自行帶入ECPay提供的HashIV
                     $obj->MerchantID  = $ecpay_args['business'];     //測試用MerchantID，請自行帶入ECPay提供的MerchantID
                     $obj->EncryptType = '1';                                                          //CheckMacValue加密類型，請固定填入1，使用SHA256加密
                     $obj->Send['ReturnURL']         = $ecpay_args['return_url'];
                     $obj->Send['OrderResultURL']    = $ecpay_args['result_url'];
-                    $obj->Send['MerchantTradeNo']   = "amlab" . time() . $this->payment_id;                           //訂單編號
+                    $obj->Send['MerchantTradeNo']   = $prefix . time() . $this->payment_id;                           //訂單編號
                     $obj->Send['MerchantTradeDate'] = date('Y/m/d H:i:s');                        //交易時間
                     $obj->Send['TotalAmount']       = $this->amount;                                       //交易金額
                     $obj->Send['TradeDesc']         = "Merchant";                                //交易描述
@@ -117,17 +134,17 @@ function pms_ecpay_extend() {
                     $obj->Send['CustomField1']      = $ecpay_args['custom'];
                     $obj->Send['CustomField2']      = $ecpay_args['item_number'];
                     array_push($obj->Send['Items'], array(
-                        'Name' => $this->subscription_plan->name, 
-                        'Price' => $this->amount,
+                        'Name'     => $this->subscription_plan->name, 
+                        'Price'    => $this->amount,
                         'Currency' => $this->currency, 
                         'Quantity' => 1, 
-                        'URL' => $this->subscription_plan->name,
+                        'URL'      => get_permalink( $this->subscription_plan->id ),
                     ));
 					if( !empty( $settings['recurring'] ) ) {
 						$obj->SendExtend['PeriodAmount']    = $this->amount;
-						$obj->SendExtend['PeriodType']      = isset( $ecpay_args['PeriodType'] ) ? $ecpay_args['PeriodType'] : 'M';
-						$obj->SendExtend['Frequency']       = 1;
-						$obj->SendExtend['ExecTimes']       = isset( $ecpay_args['ExecTimes'] ) ? $ecpay_args['ExecTimes'] : 12;
+						$obj->SendExtend['PeriodType']      = $ecpay_args['PeriodType'];
+						$obj->SendExtend['Frequency']       = $ecpay_args['Frequency'];
+						$obj->SendExtend['ExecTimes']       = $ecpay_args['ExecTimes'];
 						$obj->SendExtend['PeriodReturnURL'] = $ecpay_args['PeriodReturnURL'];
 					}
 					if ( 'zh_TW' !== get_locale() ) {
@@ -137,12 +154,6 @@ function pms_ecpay_extend() {
 					if ( 'ja' === get_locale() ) {
 						$obj->SendExtend['Language']      = 'JPN';
 					}
-
-					$payment->log_data( 'ecpay_locale', array(
-						'sys_locale'    => get_locale(),
-						'ecpay_locale'  => $obj->Send['Language'],
-						'obj'           => $obj,
-					) );
                     
                 } catch (Exception $e) {
                     echo $e->getMessage();

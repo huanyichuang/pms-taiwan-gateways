@@ -1,8 +1,14 @@
 # pms-taiwan-gateways
 Extends the feature from Paid Member Subscriptions for ECPay in Taiwan.
 
+## Debugging
+* Use `$payment->log_data()` to log the raw data during the payment.
 ## Changelog
 
-* 2022-04-20
+* 2022-04-21 (v1.1.0)
+  * Add: UI to set transaction prefix.
+  * Change: Sync period transaction to payment settings.
+
+* 2022-04-20 (v1.0.2)
   * Add: UI to set period transactions.
   * Fix: duplicated calculation of return URL.
