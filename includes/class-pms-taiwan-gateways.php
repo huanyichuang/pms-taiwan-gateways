@@ -109,8 +109,8 @@ class PMS_Taiwan_Gateways {
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-pms-taiwan-gateways-i18n.php';
-        
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-pms-taiwan-gateways-i18n.php';
+
 		/**
 		 * The class responsible for integration with the plugin Paid Member Subscriptions.
 		 */
@@ -118,7 +118,7 @@ class PMS_Taiwan_Gateways {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/gateways/ecpay/class-ecpay-sdk.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/gateways/ecpay/class-ecpay.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/gateways/ecpay/functions-ecpay.php';
-		
+
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */

@@ -66,8 +66,8 @@ if ( !function_exists( 'pms_add_settings_content_ecpay' ) ) :
                 <label class="pms-form-field-label" for="ecpay-return-url"><?php _e( 'ECPay Return URL', 'pms-taiwan-gateways' ); ?></label>
                 <input id="ecpay-return-url" 
 					type="text" 
-					name="pms_payments_settings[gateways][ecpay][return_url]" 
-					value="<?php echo isset( $options['gateways']['ecpay']['return_url' ]) ? $options['gateways']['ecpay']['return_url'] : ''; ?>" 
+					name="pms_payments_settings[gateways][ecpay][result_url]" 
+					value="<?php echo isset( $options['gateways']['ecpay']['result_url' ]) ? $options['gateways']['ecpay']['result_url'] : ''; ?>" 
 					class="widefat" />
 
                 <p class="description"><?php _e( 'Enter your ECPay return url', 'pms-taiwan-gateways' ); ?></p>
